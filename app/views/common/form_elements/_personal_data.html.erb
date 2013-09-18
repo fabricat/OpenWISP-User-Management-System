@@ -17,11 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #%>
 
-<%= form.input :given_name, :disabled => !owner.new_record? %>
+<% if Configuration.get('registration_minimal') != "true" %>
+  <%= form.input :given_name, :disabled => !owner.new_record? %>
 
-<%= form.input :surname, :disabled => !owner.new_record? %>
+  <%= form.input :surname, :disabled => !owner.new_record? %>
 
-<%= form.input :birth_date, :as => :date,
+  <%= form.input :birth_date, :as => :date,
                :disabled => !owner.new_record?,
                :start_year => Date.today.year - 90,
                :end_year => Date.today.year - 14,
@@ -29,13 +30,14 @@
                :prompt => true
 %>
 
-<%= form.input :address %>
+  <%= form.input :address %>
 
-<%= form.input :zip %>
+  <%= form.input :zip %>
 
-<%= form.input :city %>
+  <%= form.input :city %>
 
-<%= form.input :state, :collection => countries, :prompt => false %>
+  <%= form.input :state, :collection => countries, :prompt => false %>
+<% end %>
 
 <%= form.input :email %>
 
