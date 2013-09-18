@@ -88,37 +88,43 @@ class AccountCommon < ActiveRecord::Base
             :uniqueness => {:scope => :mobile_prefix, :allow_blank => true},
             :format => {:with => /\A[0-9]+\Z/, :message => :mobile_suffix_format, :allow_blank => true}
 
-  validates :given_name,
+  if (Configuration.get('registration_minimal') != "true")
+    validates :given_name,
             :presence => true,
             :format => {:with => /\A(\w|[\s'àèéìòù])+\Z/i, :message => :name_format, :allow_blank => true}
 
-  validates :surname,
+    validates :surname,
             :presence => true,
             :format => {:with => /\A(\w|[\s'àèéìòù])+\Z/i, :message => :name_format, :allow_blank => true}
 
-  validates :state,
+    validates :state,
             :presence => true,
             :format => {:with => /\A[a-z\s'\.,]+\Z/i, :message => :address_format}
 
-  validates :city,
+    validates :city,
             :presence => true,
             :format => {:with => /\A(\w|[\s'\.,\-àèéìòù])+\Z/i, :message => :address_format, :allow_blank => true}
 
-  validates :address,
+    validates :address,
             :presence => true,
             :format => {:with => /\A(\w|[\s'\.,\/\-àèéìòù])+\Z/i, :message => :address_format, :allow_blank => true}
 
-  validates :zip,
+    validates :zip,
             :presence => true,
             :format => {:with => /[a-z0-9]/, :message => :zip_format, :allow_blank => true}
 
-  validates_presence_of :birth_date
+    validates_presence_of :birth_date
+    
+    # Custom validations
+    validate :identity_document_is_present, :if => :verify_with_document?
+    validate :birth_date_present_and_valid
+  end
+    
   validates_presence_of :eula_acceptance, :message => :eula_must_be_accepted
   validates_presence_of :privacy_acceptance, :message => :privacy_must_be_accepted
 
   # Custom validations
   validate :identity_document_is_present, :if => :verify_with_document?
-  validate :birth_date_present_and_valid
   validate :no_parameter_tampering # For added security
 
 
@@ -315,10 +321,12 @@ class AccountCommon < ActiveRecord::Base
   end
 
   def no_parameter_tampering
-    @countries = Country.all
-    unless @countries.map { |p| p.printable_name }.include?(self.state)
-      errors.add(:base, "Parameters tampering, uh? Nice try but it's going to be reported...")
-      Rails.logger.error("'state' attribute tampering")
+    if Configuration.get('registration_minimal') != "true"
+      @countries = Country.all
+      unless @countries.map { |p| p.printable_name }.include?(self.state)
+        errors.add(:base, "Parameters tampering, uh? Nice try but it's going to be reported...")
+        Rails.logger.error("'state' attribute tampering")
+      end
     end
 
     if verify_with_mobile_phone?
