@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #%>
 
+<% if Configuration.get('registration_minimal') != "true" %>
 <li data-role="fieldcontain">
   <%= form.input :given_name, :disabled => !owner.new_record? %>
 </li>
@@ -50,6 +51,7 @@
 <li data-role="fieldcontain">
   <%= form.input :state, :collection => countries, :prompt => false %>
 </li>
+<% end %>
 
 <li data-role="fieldcontain">
   <%= form.input :email %>
